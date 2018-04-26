@@ -1,5 +1,7 @@
 package cn.test;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -9,15 +11,36 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 import org.junit.Test;
 
-import cn.bottleneck.BeforeScheduling;
+import cn.bottleneck.AfterBottleneck;
+import cn.bottleneck.BeforeBottleneck;
 import cn.pojo.Job;
 import cn.pojo.JobItem;
+import cn.pojo.Task;
 import cn.pojo.Wop;
+import cn.pojo.Process;
 import cn.service.Service;
 import cn.utils.HibernateUtils;
 
 
-public class TestBeforeScheduling {
+public class TestAroundBottleneck {
+	@Test
+	public void TestSaveTask() {
+		Service service = Service.getService();
+		Task task = new Task();
+		LocalDateTime ldt = LocalDateTime.now();
+		task.setEndTime(ldt);
+		service.save(task);
+		HibernateUtils.closeAll();
+	}
+	
+	@Test
+	public void Testjob2Task() {
+		AfterBottleneck run = new AfterBottleneck();
+		run.job2Task();
+		HibernateUtils.closeAll();
+	}
+	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void TestPlatingSingleOrderDivide() {
 		
@@ -28,7 +51,7 @@ public class TestBeforeScheduling {
 		Query query = session.createQuery("from Wop");
 		List<Wop> list = query.list();
 		
-		BeforeScheduling run = new BeforeScheduling();
+		BeforeBottleneck run = new BeforeBottleneck();
 		List<JobItem> items= run.platingSingleOrderDivide(list.get(1));
 		
 		for (JobItem jobItem : items) {
@@ -48,7 +71,7 @@ public class TestBeforeScheduling {
 		criteria.add(Restrictions.eq("isfull", false));
 		List<JobItem> notFullItems = criteria.list();
 		
-		BeforeScheduling bs = new BeforeScheduling();
+		BeforeBottleneck bs = new BeforeBottleneck();
 		List<Job> jobs = bs.combineNotFull(notFullItems);
 		
 		int jobItemSize=0;
@@ -71,7 +94,7 @@ public class TestBeforeScheduling {
 		criteria.add(Restrictions.eq("isfull", true));
 		List<JobItem> fullItems = criteria.list();
 		
-		BeforeScheduling bs = new BeforeScheduling();
+		BeforeBottleneck bs = new BeforeBottleneck();
 		List<Job> jobs = bs.combineFull(fullItems);
 		
 		int jobItemSize=0;
@@ -89,7 +112,7 @@ public class TestBeforeScheduling {
 	
 	@Test
 	public void TestCombine() {
-		BeforeScheduling bs = new BeforeScheduling();
+		BeforeBottleneck bs = new BeforeBottleneck();
 		List<Job> jobs  = bs.combine();
 		
 		int jobItemSize=0;
@@ -107,7 +130,7 @@ public class TestBeforeScheduling {
 	
 	@Test
 	public void TestDivideAndCombine() {
-		BeforeScheduling bs = new BeforeScheduling();
+		BeforeBottleneck bs = new BeforeBottleneck();
 		
 		List<Job> jobs  = bs.divideAndCombine();
 		

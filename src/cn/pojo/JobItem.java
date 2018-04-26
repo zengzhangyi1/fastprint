@@ -19,7 +19,7 @@ public class JobItem {
 	
 	int qty;
 	boolean isfull;
-	
+		
 	@ManyToOne
 	@JoinColumn(name="oid")
 	Order order;
@@ -32,7 +32,6 @@ public class JobItem {
 	@JoinColumn(name="jid")
 	Job job;
 	
-
 	@Override
 	public String toString() {
 		return "JobItem [jobItemId=" + jobItemId + ", qty=" + qty + ", isfull=" + isfull + "£¬length =" +wop.getWidth()*qty+
@@ -86,5 +85,5 @@ public class JobItem {
 	public void setIsfull(boolean isfull) {
 		this.isfull = isfull;
 	}
-	
+
 }

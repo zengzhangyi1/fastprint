@@ -9,9 +9,9 @@ import cn.pojo.Job;
 import cn.utils.ResourceUtils;
 
 public class Solution extends BottleneckBasic{
-	private List<Integer> a = new ArrayList<>();
+	private List<Integer> a = new ArrayList<>();	//基于0
 	private double makespan;
-	
+	private double averageCompleteTime;
 	//生成随机解
 	public void RandomSolution() {
 		int solutionLength = jobs.size();
@@ -28,6 +28,7 @@ public class Solution extends BottleneckBasic{
 		boolean occupy[] = new boolean[tankNum];		//电镀池是否被占用
 		double hoist = 0;	//抓钩最早开始时间
 		int busytank = 0;	//记录工作中的电镀池数
+		double time = 0;
 
 		boolean lastload = true;
 		
@@ -40,7 +41,7 @@ public class Solution extends BottleneckBasic{
 				occupy[tank] = false;
 				busytank--;
 				lastload = false;
-				
+				time += hoist;
 				for(int j =0;j<startTime.length;j++) {
 					if(j==tank) {
 						startTime[j] = hoist;
@@ -59,6 +60,7 @@ public class Solution extends BottleneckBasic{
 					hoist += ResourceUtils.getCircleTime();
 				}
 				busytank++;
+				lastload = true;
 				//计算电镀池开始时间
 				for(int j =0;j<startTime.length;j++) {
 					if(j==tank) {
@@ -80,7 +82,7 @@ public class Solution extends BottleneckBasic{
 			hoist = startTime[tank];
 			occupy[tank] = false;
 			busytank--;
-			
+			time += hoist;
 			for(int j =0;j<startTime.length;j++) {
 				if(j==tank) {
 					startTime[j] = hoist;
@@ -93,6 +95,7 @@ public class Solution extends BottleneckBasic{
 				}
 			}
 		}
+		setAverageCompleteTime(time);
 		setMakespan(hoist);
 		return hoist;
 	}
@@ -119,6 +122,12 @@ public class Solution extends BottleneckBasic{
 	}
 	public static void setJobs(List<Job> jobs) {
 		Solution.jobs = jobs;
+	}
+	public double getAverageCompleteTime() {
+		return averageCompleteTime;
+	}
+	public void setAverageCompleteTime(double averageCompleteTime) {
+		this.averageCompleteTime = averageCompleteTime;
 	}
 	
 }

@@ -24,6 +24,9 @@
         <mapping class="cn.pojo.Process"/>
         <mapping class="cn.pojo.Job"/>
         <mapping class="cn.pojo.JobItem"/>
+        <mapping class="cn.pojo.Task"/>
+        
+        
     </session-factory>
  
 </hibernate-configuration>

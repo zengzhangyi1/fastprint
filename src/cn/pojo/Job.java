@@ -71,4 +71,10 @@ public class Job {
 		this.jobItems = jobItems;
 	}
 
+	@Override
+	public String toString() {
+		return "Job [jobId=" + jobId + ", processTime=" + processTime + ", resourceId=" + resourceId + ", startTime="
+				+ startTime + ", endTime=" + endTime + "]";
+	}
+	
 }

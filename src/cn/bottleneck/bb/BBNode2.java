@@ -2,7 +2,6 @@ package cn.bottleneck.bb;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,16 +14,16 @@ import cn.bottleneck.BottleneckBasic;
 import cn.pojo.Job;
 import cn.utils.ResourceUtils;
 
-public class BBNode extends BottleneckBasic implements Comparable<BBNode> {
-	ArrayList<Integer> done;
-	Map<Double,LinkedList<Integer>> undo;
+public class BBNode2 extends BottleneckBasic implements Comparable<BBNode2> {
+	ArrayList<Integer> done;	//基于1
+	Map<Double,LinkedList<Integer>> undo;	//基于1
 	private double makespan;
 	private int busyTankNum;
 	
-	public BBNode() {
+	public BBNode2() {
 		
 	}
-	public BBNode(boolean first) {
+	public BBNode2(boolean first) {
 		if(first) {
 			done = new ArrayList<Integer>();
 			undo = new HashMap<Double,LinkedList<Integer>>();
@@ -52,14 +51,7 @@ public class BBNode extends BottleneckBasic implements Comparable<BBNode> {
 			undoJobList.add(jobs.get(i));
 		}
 		//按照加工时间从小到大将Job排序
-		Collections.sort(undoJobList,new Comparator<Job>() {
-
-			@Override
-			public int compare(Job o1, Job o2) {
-				return (int)(o1.getProcessTime()-o2.getProcessTime());
-			}
-			
-		});
+		Collections.sort(undoJobList,(o1,o2)->(int)(o1.getProcessTime()-o2.getProcessTime()));
 		
 		int busytank = 0;	//记录工作中的电镀池数
 
@@ -286,8 +278,8 @@ public class BBNode extends BottleneckBasic implements Comparable<BBNode> {
 	}
 	
 	//繁衍下一代
-	public List<BBNode> generate(double upperBound){
-		List<BBNode> nextGneration = new ArrayList<>();
+	public List<BBNode2> generate(double upperBound){
+		List<BBNode2> nextGneration = new ArrayList<>();
 		Set<Entry<Double, LinkedList<Integer>>> entrySet = undo.entrySet();
 		double unloadkey = (double)-1;
 		//有空闲电镀池才能生成装载
@@ -297,7 +289,7 @@ public class BBNode extends BottleneckBasic implements Comparable<BBNode> {
 				//工作任务加工时间大于0，则每种加工时间只生成一个子代
 				if(entry.getKey()>0) {
 					
-					BBNode newNode = new BBNode();
+					BBNode2 newNode = new BBNode2();
 
 					//复制上一代的done 和 undo
 					ArrayList<Integer> newdone = new ArrayList<>();
@@ -345,7 +337,7 @@ public class BBNode extends BottleneckBasic implements Comparable<BBNode> {
 		
 		if(undo.containsKey(unloadkey)) {
 			for(Integer index:undo.get(unloadkey)) {
-				BBNode newNode = new BBNode();
+				BBNode2 newNode = new BBNode2();
 
 				//复制上一代的done 和 undo
 				ArrayList<Integer> newdone = new ArrayList<>();
@@ -386,7 +378,7 @@ public class BBNode extends BottleneckBasic implements Comparable<BBNode> {
 		return jobs;
 	}
 	public static void setJobs(List<Job> jobs) {
-		BBNode.jobs = jobs;
+		BBNode2.jobs = jobs;
 	}
 	public ArrayList<Integer> getDone() {
 		return done;
@@ -414,7 +406,7 @@ public class BBNode extends BottleneckBasic implements Comparable<BBNode> {
 		this.busyTankNum = busyTankNum;
 	}
 	@Override
-	public int compareTo(BBNode other) {
+	public int compareTo(BBNode2 other) {
 		return this.getMakespan()<other.getMakespan()?-1:1;
 	}
 	

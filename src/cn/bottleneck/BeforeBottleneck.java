@@ -19,17 +19,21 @@ import cn.utils.ResourceUtils;
 
 
 /*
+*该类的作用是瓶颈排产前的订单拆分与合挂
+* 
 *1.platingOrderDivide()是订单拆分，数据库上对应的是将电镀Wop转换为JobItem的过程
 *2.combine()是合挂，数据库上对应的是将JobItem合挂为Job的过程,并会存储到数据库
-*3.divideAndCombine()是拆分与合挂的一个整体过程，会调用platingOrderDivide()，combine()函数，并且会根据数据库相应表格是否为空来判断
-*  是否需要存储到数据库
+*3.divideAndCombine()是拆分与合挂的一个整体过程，会调用platingOrderDivide()，combine()函数，并且会根据数据库相应表格是否为空来判
+*断是否需要存储到数据库
+*
+*！！使用该类时，需先将jobitem和job表清空！！
 */
-public class BeforeScheduling {
-	Service service = new Service();
+public class BeforeBottleneck extends BottleneckBasic {
+	Service service = Service.getService();
 	
 	public static void main(String[] args) {
-		BeforeScheduling bs = new BeforeScheduling();
-		bs.divideAndCombine();
+		BeforeBottleneck ab = new BeforeBottleneck();
+		ab.divideAndCombine();
 		HibernateUtils.closeAll();
 		System.out.println("订单拆分与合挂已完成");
 	}
@@ -42,7 +46,7 @@ public class BeforeScheduling {
 		
 		//拆分
 		List<JobItem> jobItems = platingOrderDivide(platingWop);
-		//如果数据库wop表格为空，表明是第一次执行，会将对象持久化，将数据保存到数据库
+		//如果数据库jobitem表格为空，表明是第一次执行，会将对象持久化，将数据保存到数据库
 		if(service.list(JobItem.class).isEmpty()) {
 			service.save(jobItems);
 		}
@@ -53,7 +57,7 @@ public class BeforeScheduling {
 		return jobs;
 	}
 	
-	//将所有的电镀JobItem转换成Job，doSave表示是否存储到数据库
+	//将所有的电镀JobItem转换成Job
 	@SuppressWarnings("unchecked")
 	public List<Job> combine() {
 		List<JobItem> fullItems = service.list(JobItem.class, "isfull",true);
@@ -71,6 +75,7 @@ public class BeforeScheduling {
 		
 		for (int i = 0;i<jobs.size();i++) {
 			jobs.get(i).setJobId(i+1);
+			Transaction tx = service.beginTransaction();
 			if(service.get(Job.class, i+1)!=null) {
 				service.evict(service.get(Job.class, i+1));
 			}
@@ -80,6 +85,7 @@ public class BeforeScheduling {
 				service.update(jobitem);
 				service.flush();
 			}
+			tx.commit();
 		}
 		
 		return jobs;

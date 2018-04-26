@@ -18,6 +18,14 @@ import cn.utils.HibernateUtils;
 
 @SuppressWarnings("rawtypes")
 public class Service {
+	private static Service service = new Service();
+	private Service() {
+		
+	}
+	public static Service getService() {
+		return service;
+	}
+	
 	private static Session session = HibernateUtils.getSession();
 
 	

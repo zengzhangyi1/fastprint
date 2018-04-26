@@ -1,13 +1,18 @@
 package cn.bottleneck.ga;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import cn.bottleneck.BottleneckBasic;
 import cn.utils.HibernateUtils;
+import cn.utils.IOUtil;
+import cn.utils.ResourceUtils;
+import gantt.GanttChart;
 
 import java.util.Set;
 
@@ -22,22 +27,37 @@ public class GA {
 		/* 
 		 * 第一个参数是每代种群大小
 		 * 第二个参数是繁衍代数
+		 * 第三个参数代表是否显示甘特图
+		 * 第四个参数代表是否更新数据库
 		 * */
-		ga.algorithmRun(50, 1000);
+		ga.algorithmRun(50, 500,true,true);
 		HibernateUtils.closeAll();
 	}
 	
-	public void algorithmRun(int populationNum,int genertations) {
+	public void algorithmRun(int populationNum,int genertations,boolean gantt,boolean updateDB) {
+		Date beginTime  = new Date();
 		Population testga=new Population(populationNum,true);
 		for(int i=0;i<genertations;i++)
 		{
 			testga = evolve(testga);
 			System.out.print(i+1);System.out.println("	"+testga.getfittest().getMakespan());
 		}
+		Date endTime = new Date();
+		long runtime = (endTime.getTime() -beginTime.getTime());
+		Solution best=testga.getfittest();
+		best.encode(best.getA(),updateDB);
 		
-		Solution finalsolu=testga.getfittest();
+		if(gantt) {
+			IOUtil.writeTxt(BottleneckBasic.jobs);
+			GanttChart gant = new GanttChart(ResourceUtils.getTankNum(),(float)best.getMakespan(), best.getA().size());
+			gant.setVisible(true);
+		}
+		
 		System.out.println("-------最优---------");
-		System.out.println(finalsolu.getMakespan());
+		System.out.println(best.getA());
+		System.out.println("makespan:"+best.getMakespan());
+		System.out.println("AverageCompleteTime:"+best.getAverageCompleteTime());
+		System.out.println("runTime:"+runtime+"ms");
 	}
 	
 	//交叉算子  Partial-Mapped Crossover (PMX)
